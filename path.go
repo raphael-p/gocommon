@@ -6,8 +6,10 @@ import (
 	"path/filepath"
 )
 
-// Find the directory the program's executable is stored in.
-func GetExecDirectory(executableName, fallbackPath string) string {
+// Checks if we are running the program as its executable.
+// if so, fetch the executable directory. Otherwise, returns an
+// empty string
+func GetExecDirectory(executableName string) string {
 	if os.Args[0] == executableName {
 		// if executed from compiled binary, use its directory
 		ex, err := os.Executable()
@@ -16,7 +18,6 @@ func GetExecDirectory(executableName, fallbackPath string) string {
 		}
 		return filepath.Dir(ex)
 	} else {
-		// otherwise, use fallback directory (relative path)
-		return fallbackPath
+		return ""
 	}
 }

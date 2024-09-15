@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 )
 
-func InitialiseConfig[T any](executableName, configEnvar string) *T {
+func InitialiseConfig[T any](workingDir, configEnvar string) *T {
 	filePath := os.Getenv(configEnvar)
 	if filePath == "" {
 		fmt.Printf("$%s not set, using default config\n", configEnvar)
-		filePath = filepath.Join(GetExecDirectory(executableName, "."), "default.json")
+		filePath = filepath.Join(workingDir, "default.json")
 	}
 
 	file, err := os.Open(filePath)

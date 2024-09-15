@@ -16,11 +16,11 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024
 const MAX_MESSAGE_BYTES = 10 * 1024
 
 type MyLogger struct {
-	StdOutLogger     *log.Logger
-	FileLogger       *log.Logger
-	logLevel         logLevel
-	cumBytes         int64
-	workingDirectory string
+	StdOutLogger *log.Logger
+	FileLogger   *log.Logger
+	logLevel     logLevel
+	cumBytes     int64
+	workingDir   string
 }
 
 type logLevel uint8
@@ -46,7 +46,7 @@ func newLogger(out io.Writer) *log.Logger {
 var Logger *MyLogger = &MyLogger{newLogger(os.Stdout), nil, logLevel(0), 0, "."}
 
 func openLogFile() *os.File {
-	directory := filepath.Join(Logger.workingDirectory, "logs")
+	directory := filepath.Join(Logger.workingDir, "logs")
 	name := "server.log"
 	path := filepath.Join(directory, generateFilename(name, directory))
 	logFile, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -91,10 +91,10 @@ func generateFilename(name, directory string) string {
 	}
 }
 
-func InitLogger(workingDirectory string) {
+func InitLogger(workingDir string) {
 	Logger.logLevel = logLevel(0)
 	Logger.FileLogger = newLogger(openLogFile())
-	Logger.workingDirectory = workingDirectory
+	Logger.workingDir = workingDir
 	LogTrace("file logger initialised")
 }
 
