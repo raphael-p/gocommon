@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func InitialiseConfig[T any](workingDir, configEnvar string) *T {
+func InitialiseConfig[T any](workingDir, configEnvar string, configStruct *T) {
 	filePath := os.Getenv(configEnvar)
 	if filePath == "" {
 		fmt.Printf("$%s not set, using default config\n", configEnvar)
@@ -20,10 +20,7 @@ func InitialiseConfig[T any](workingDir, configEnvar string) *T {
 	}
 	defer file.Close()
 
-	config := new(T)
-	if err = json.NewDecoder(file).Decode(config); err != nil {
+	if err = json.NewDecoder(file).Decode(configStruct); err != nil {
 		panic(fmt.Sprint("could not parse config file: ", err))
 	}
-
-	return config
 }
