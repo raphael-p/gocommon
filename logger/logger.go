@@ -1,4 +1,4 @@
-package gocommon
+package logger
 
 import (
 	"fmt"
@@ -91,6 +91,7 @@ func generateFilename(name, directory string) string {
 	}
 }
 
+// Creates a logger which manages its logs files and logs to the console.
 func InitLogger(workingDir string) {
 	Logger.logLevel = logLevel(0)
 	Logger.FileLogger = newLogger(openLogFile())
@@ -98,6 +99,7 @@ func InitLogger(workingDir string) {
 	LogTrace("file logger initialised")
 }
 
+// Handles the closing of the log file
 func CloseLogger() {
 	if Logger.FileLogger == nil {
 		return
