@@ -1,6 +1,7 @@
-package config
+package validate
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -68,7 +69,7 @@ func traverseStructFields(
 //	`zeroable:"true"` -> for JSONField only, allows field to be set to zero-value
 //
 // Used to validate the deserialisation of a JSON document.
-func structFromJSON(value any) ([]string, error) {
+func StructFromJSON(value any) ([]string, error) {
 	reflectValue := reflect.ValueOf(value)
 	if reflectValue.Kind() == reflect.Ptr {
 		reflectValue = reflectValue.Elem()
@@ -77,4 +78,52 @@ func structFromJSON(value any) ([]string, error) {
 		return nil, fmt.Errorf("expected `value` to be a struct or its pointer, got %T", value)
 	}
 	return traverseStructFields(reflectValue, "", []string{}), nil
+}
+
+// Type wrapper used to validate the struct which a JSON document is
+// unmarshaled to. Accepted tags:
+//
+//	`json:"nameInJson"` -> maps JSON to struct fields when deserialising JSON
+//	`optional:"true"` -> allows field to not be set
+//	`nullable:"true"` -> allows field to be set to null
+//	`zeroable:"true"` -> allows field to be set to zero-value
+type JSONField[T any] struct {
+	Value  T
+	IsNull bool
+	IsSet  bool
+}
+
+// this is called implicitly when unmarshalling into a struct containing JSONField
+func (i *JSONField[any]) UnmarshalJSON(data []byte) error {
+	i.IsSet = true
+
+	if string(data) == "null" {
+		i.IsNull = true
+		return nil
+	}
+
+	var temp any
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+	i.Value = temp
+	i.IsNull = false
+	return nil
+}
+
+// Validates that the input is a pointer to a struct where all fields are strings.
+func PointerToStringStruct(ptr any) bool {
+	reflectValue := reflect.ValueOf(ptr)
+	if reflectValue.Kind() != reflect.Ptr || reflectValue.Elem().Kind() != reflect.Struct {
+		return false
+	}
+
+	reflectType := reflectValue.Type().Elem()
+	for i := 0; i < reflectType.NumField(); i++ {
+		if reflectType.Field(i).Type.Kind() != reflect.String {
+			return false
+		}
+	}
+
+	return true
 }

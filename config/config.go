@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/raphael-p/gocommon/validate"
 )
 
 // Parses the config json and decodes it into an arbitrary struct.
@@ -23,7 +25,7 @@ import (
 //	`optional:"true"` -> for JSONField only, allows field to not be set
 //	`nullable:"true"` -> for JSONField only, allows field to be set to null
 //	`zeroable:"true"` -> for JSONField only, allows field to be set to zero-value
-func Parse[T any](workingDir, configEnvar string, configStruct *T) {
+func Parse[T any](workingDir, configEnvar string, configStruct *T, skipValidation bool) {
 	filePath := os.Getenv(configEnvar)
 	if filePath == "" {
 		fmt.Printf("$%s not set, using default config\n", configEnvar)
@@ -40,7 +42,11 @@ func Parse[T any](workingDir, configEnvar string, configStruct *T) {
 		panic(fmt.Sprint("could not parse config file: ", err))
 	}
 
-	fields, err := structFromJSON(configStruct)
+	if skipValidation {
+		return
+	}
+
+	fields, err := validate.StructFromJSON(configStruct)
 	if err != nil {
 		panic(err)
 	}
