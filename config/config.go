@@ -23,7 +23,7 @@ import (
 //	`optional:"true"` -> for JSONField only, allows field to not be set
 //	`nullable:"true"` -> for JSONField only, allows field to be set to null
 //	`zeroable:"true"` -> for JSONField only, allows field to be set to zero-value
-func InitialiseConfig[T any](workingDir, configEnvar string, configStruct *T) {
+func Parse[T any](workingDir, configEnvar string, configStruct *T) {
 	filePath := os.Getenv(configEnvar)
 	if filePath == "" {
 		fmt.Printf("$%s not set, using default config\n", configEnvar)

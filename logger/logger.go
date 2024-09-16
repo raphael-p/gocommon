@@ -92,15 +92,15 @@ func generateFilename(name, directory string) string {
 }
 
 // Creates a logger which manages its logs files and logs to the console.
-func InitLogger(workingDir string) {
+func Create(workingDir string) {
 	Logger.logLevel = logLevel(0)
 	Logger.FileLogger = newLogger(openLogFile())
 	Logger.workingDir = workingDir
-	LogTrace("file logger initialised")
+	Trace("file logger initialised")
 }
 
 // Handles the closing of the log file
-func CloseLogger() {
+func Close() {
 	if Logger.FileLogger == nil {
 		return
 	}
@@ -109,7 +109,7 @@ func CloseLogger() {
 		if err != nil {
 			panic(fmt.Sprint("failed to close log file: ", err))
 		}
-		LogTrace("log file closed")
+		Trace("log file closed")
 	}
 }
 
@@ -132,42 +132,42 @@ func rollover() {
 	if file, ok := Logger.FileLogger.Writer().(*os.File); ok {
 		if stats, err := file.Stat(); err == nil && stats.Size() > MAX_FILE_BYTES {
 			Logger.cumBytes = 0
-			LogTrace(fmt.Sprintf(
+			Trace(fmt.Sprintf(
 				"reached maximum log file size (%d bytes), rolling over",
 				MAX_FILE_BYTES,
 			)) // can cause infinite loop if MAX_FILE_BYTES is too low
-			CloseLogger()
+			Close()
 			Logger.FileLogger = newLogger(openLogFile())
-			LogTrace("new log file opened")
+			Trace("new log file opened")
 		}
 	}
 }
 
-func LogTrace(message string) {
+func Trace(message string) {
 	if Logger.logLevel <= logLevelTrace {
 		logMessage("TRACE", "", message)
 	}
 }
 
-func LogDebug(message string) {
+func Debug(message string) {
 	if Logger.logLevel <= logLevelDebug {
 		logMessage("DEBUG", "\033[34m", message)
 	}
 }
 
-func LogInfo(message string) {
+func Info(message string) {
 	if Logger.logLevel <= logLevelInfo {
 		logMessage("INFO", "\033[36m", message)
 	}
 }
 
-func LogWarning(message string) {
+func Warning(message string) {
 	if Logger.logLevel <= logLevelWarning {
 		logMessage("WARNING", "\033[33;1m", message)
 	}
 }
 
-func LogError(message string) {
+func Error(message string) {
 	if Logger.logLevel <= logLevelError {
 		buf := make([]byte, 1<<16)
 		n := runtime.Stack(buf, false)
